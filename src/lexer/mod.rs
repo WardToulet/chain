@@ -1,4 +1,4 @@
-mod lex_token;
+pub mod lex_token;
 use lex_token::LexToken;
 
 pub fn lex(code: &str) -> Option<Vec<LexToken>> {
@@ -8,6 +8,7 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
     while let Some(c) = iter.next() {
         match c {
             ';' => tokens.push(LexToken::SemiColon),
+            ':' => tokens.push(LexToken::Colon),
 
             '(' => tokens.push(LexToken::ParanthesisOpen),
             ')' => tokens.push(LexToken::ParanthesisClose),
@@ -35,7 +36,9 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                         },
                         _ => tokens.push(LexToken::Minus),
                     }
-                }  
+                } else {
+                    tokens.push(LexToken::Minus);
+                } 
             },
             
             '+' => {
@@ -51,6 +54,8 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                         },
                         _ => tokens.push(LexToken::Plus),
                    } 
+                } else {
+                    tokens.push(LexToken::Plus);
                 }
             },
 
@@ -63,6 +68,8 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                         },
                         _ => tokens.push(LexToken::Star),
                     }
+                } else {
+                    tokens.push(LexToken::Star);
                 }
             },
 
@@ -73,9 +80,32 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                             tokens.push(LexToken::SlashEquals);
                             iter.next();
                         },
+                        '/' => {
+                            while let Some(n) = iter.peek() {
+                                if n == &'\n' {
+                                    iter.next();
+                                    break;
+                                }
+                                iter.next();
+                            }
+                        },
+                        '*' => {
+                            while let Some(n) = iter.next() {
+                                if n == '*' {
+                                    if let Some(e) = iter.peek() {
+                                        if e == &'/' {
+                                            iter.next();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         _ => tokens.push(LexToken::Slash),
                     }
-                }
+                } else {
+                    tokens.push(LexToken::Slash);
+                } 
             },
 
             '%' => {
@@ -87,6 +117,8 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                         },
                         _ => tokens.push(LexToken::Percent),
                     }
+                } else {
+                    tokens.push(LexToken::Percent);
                 }
             },
 
@@ -98,6 +130,8 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                         },
                         _ => tokens.push(LexToken::GreatherThen),
                     }
+                } else {
+                    tokens.push(LexToken::GreatherThen);
                 }
             },
 
@@ -109,6 +143,8 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                         },
                         _ => tokens.push(LexToken::SmallerThen),
                     }
+                } else {
+                    tokens.push(LexToken::SmallerThen);
                 }
             },
 
@@ -120,11 +156,9 @@ pub fn lex(code: &str) -> Option<Vec<LexToken>> {
                         },
                         _ => tokens.push(LexToken::Equals),
                     }
+                } else {
+                    tokens.push(LexToken::Equals);
                 }
-            },
-
-            ':' => {
-                tokens.push(LexToken::Colon);
             },
 
             x if x.is_alphabetic() => {
@@ -212,6 +246,16 @@ mod tests {
     }
 
     #[test]
+    fn test_lex_single_token_1() {
+        test_lex("=", vec![LexToken::Equals]);
+    }
+
+    #[test]
+    fn test_lex_single_token_2() {
+        test_lex("->", vec![LexToken::Arrow]);
+    }
+
+    #[test]
     fn test_lex_variable_definition_1() {
         test_lex("let foo: bool = false;", vec![
             LexToken::Let,
@@ -269,5 +313,15 @@ mod tests {
            LexToken::BraceClose,
            LexToken::SemiColon,
         ]);
+    }
+
+    #[test]
+    fn test_lex_comment_1() {
+        test_lex("// hello world\n", vec![]);
+    }
+
+    #[test]
+    fn test_lex_comment_1() {
+        test_lex("// hello world\n", vec![]);
     }
 }
