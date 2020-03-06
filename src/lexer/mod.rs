@@ -321,7 +321,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lex_comment_1() {
-        test_lex("// hello world\n", vec![]);
+    fn test_lex_comment_2() {
+        test_lex("// hello world\n ==", vec![LexToken::EqualsEquals]);
     }
 }
