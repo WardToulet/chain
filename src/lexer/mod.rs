@@ -324,4 +324,20 @@ mod tests {
     fn test_lex_comment_2() {
         test_lex("// hello world\n ==", vec![LexToken::EqualsEquals]);
     }
+
+    #[test]
+    fn test_lex_comment_3() {
+        test_lex("/* this is a comment */ let this_is_not = false;", vec![
+            LexToken::Let,
+            LexToken::Identifire(String::from("this_is_not")),
+            LexToken::Equals,
+            LexToken::False,
+            LexToken::SemiColon,
+        ]);
+    }
+
+    #[test]
+    fn test_lex_comment_4() {
+        test_lex("/* this text should be ignored */", vec![]);
+    }
 }
